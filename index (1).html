@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b3a8c">
+<title>AB Media - Credit Tracker</title>
+<link rel="icon" id="favicon" href="data:,">
+<style>
+:root{
+  --ink:#14202b; --mute:#66758a; --line:#e3e9f0; --bg:#f1f4f9; --card:#fff;
+  --brand:#0b3a8c; --brand2:#1d63d6; --red:#d3202a; --ok:#1e8e4e; --warn:#e08a00; --wa:#1faa59;
+  --r:14px; --shadow:0 6px 20px rgba(11,58,140,.10);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+h1,h2,h3{margin:0}
+h2{font-size:18px;margin-bottom:10px}
+h3{font-size:15px;margin:16px 0 8px}
+.hide{display:none!important}
+.muted{color:var(--mute);font-size:13px;margin:4px 0 10px}
+
+/* header */
+.top{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  padding:10px 16px;color:#fff;background:linear-gradient(135deg,var(--brand),var(--brand2));box-shadow:0 2px 12px rgba(0,0,0,.2)}
+.brand{display:flex;align-items:center;gap:12px;flex:1 1 280px;min-width:0}
+.brand>div{min-width:0}
+.logo{flex:0 0 auto;height:50px;width:auto;max-width:130px;padding:4px 8px;border-radius:10px;background:#fff;object-fit:contain;border:none;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.brand h1{font-size:18px;line-height:1.2;white-space:normal;overflow-wrap:anywhere}
+.brand small{display:block;opacity:.92;font-size:12px;font-style:italic;white-space:normal;overflow-wrap:anywhere}
+nav{flex:0 1 auto}
+nav{display:flex;gap:6px;flex-wrap:wrap}
+nav button{border:0;cursor:pointer;color:#fff;background:rgba(255,255,255,.17);padding:9px 14px;border-radius:999px;font-size:14px;font-weight:600}
+nav button.on{background:#fff;color:var(--brand)}
+
+main{max-width:1150px;margin:0 auto;padding:14px}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px}
+.stat{background:var(--card);border-radius:var(--r);padding:14px;box-shadow:var(--shadow);border-left:5px solid var(--brand2)}
+.stat small{display:block;color:var(--mute);font-size:12px;margin-bottom:3px}
+.stat b{font-size:19px}
+.stat.ok{border-color:var(--ok)} .stat.red{border-color:var(--red)} .stat.warn{border-color:var(--warn)}
+
+/* panels & forms */
+.panel{background:var(--card);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-bottom:6px}
+.field{margin-bottom:8px}
+label{display:block;font-size:12px;font-weight:600;color:var(--mute);margin-bottom:4px}
+input,select,textarea{width:100%;padding:10px 11px;font:inherit;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:10px}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--brand2);border-color:transparent}
+input[readonly]{background:#eef3fb;font-weight:700;color:var(--brand)}
+.hint{color:var(--mute);font-size:12px}
+
+.btn{border:0;cursor:pointer;font:inherit;font-weight:600;padding:10px 16px;border-radius:10px;color:#fff;background:var(--brand2);text-decoration:none;display:inline-block}
+.btn:hover{filter:brightness(1.08)}
+.btn.primary{background:var(--brand)}
+.btn.big{padding:13px 20px;font-size:16px}
+.btn.ghost{background:#e8eef6;color:var(--ink)}
+.btn.ok{background:var(--ok)} .btn.red{background:var(--red)} .btn.wa{background:var(--wa)}
+.btn.sm{padding:6px 10px;font-size:13px;border-radius:8px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
+/* service lines */
+.items-head,.item{display:grid;grid-template-columns:minmax(0,2.4fr) 90px 140px 130px 38px;gap:8px;align-items:center}
+.items-head{font-size:11px;font-weight:700;color:var(--mute);text-transform:uppercase;padding:0 2px 4px}
+.items-head .r{text-align:right;padding-right:6px}
+.item{margin-bottom:8px}
+.item output{font-weight:700;text-align:right;padding-right:6px}
+.item .x{border:0;background:#fbe9e9;color:var(--red);border-radius:8px;height:38px;cursor:pointer;font-size:18px}
+.totalbar{display:flex;justify-content:space-between;align-items:center;margin:14px 0;padding:14px 16px;border-radius:12px;background:#e9f0fc;color:var(--brand);font-weight:600}
+.totalbar b{font-size:22px}
+
+/* table */
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.toolbar input,.toolbar select{flex:1;min-width:150px;width:auto}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:880px}
+th,td{padding:10px 8px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:11px;text-transform:uppercase;color:var(--mute);letter-spacing:.3px;white-space:nowrap}
+td.num,th.num{text-align:right;white-space:nowrap}
+td small{display:block;color:var(--mute)}
+.tag{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;color:#fff}
+.tag.Pending{background:var(--brand2)} .tag.Partial{background:var(--warn)} .tag.Paid{background:var(--ok)}
+.age{display:inline-block;padding:3px 9px;border-radius:8px;font-weight:700;font-size:13px;white-space:nowrap}
+.age1{background:#e9f0fc;color:var(--brand)} .age2{background:#fff1d6;color:#9a5b00} .age3{background:#fde6e6;color:var(--red)}
+td.act{white-space:nowrap}
+td.act .btn{margin-right:4px}
+.empty{text-align:center;color:var(--mute);padding:26px 10px}
+
+/* dialogs */
+dialog{border:0;border-radius:16px;padding:20px;width:min(500px,94vw);max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+dialog::backdrop{background:rgba(10,25,40,.5)}
+.sendrow{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:10px 12px;margin-bottom:8px;border:1px solid var(--line);border-radius:12px}
+.sendrow .actions{margin:0}
+.msgbox{white-space:pre-wrap;background:#f4f7fb;border:1px dashed #b8c6dc;border-radius:10px;padding:10px 12px;font-size:14px}
+.kv{display:grid;grid-template-columns:100px 1fr;gap:4px 10px;font-size:14px;margin:8px 0}
+.kv span{color:var(--mute)}
+.mini{width:100%;min-width:0;border-collapse:collapse;font-size:14px}
+.mini td{padding:6px 4px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(30px);opacity:0;pointer-events:none;
+  background:#14202b;color:#fff;padding:11px 18px;border-radius:999px;font-size:14px;transition:.25s;z-index:30;max-width:92vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* login page */
+body.locked main, body.locked nav{display:none!important}
+.loginpage{max-width:420px;margin:28px auto;padding:0 14px}
+.loginpage .panel{padding:22px}
+.loginpage h2{font-size:22px;margin-bottom:6px}
+.loginpage input{font-size:17px;padding:13px 12px}
+.loginpage .btn{width:100%;font-size:17px;padding:14px}
+/* phone layout */
+@media (max-width:640px){
+  main{padding:10px}
+  .items-head{display:none}
+  .item{grid-template-columns:1fr 1fr;padding:10px;border:1px solid var(--line);border-radius:12px;background:#fafcff}
+  .item .i-svc{grid-column:1 / -1}
+  .item output{text-align:left;padding-left:4px}
+  .item .x{justify-self:end;width:38px}
+  .btn.big{width:100%}
+}
+
+/* printing: only #printArea is printed */
+#printArea{display:none}
+@media print{
+  html,body{background:#fff}
+  .top,main,dialog,.toast,#loginPage{display:none!important}
+  #printArea{display:block}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+#printArea{color:#000;font:13px/1.4 Arial,Helvetica,sans-serif}
+#printArea .ph{display:flex;align-items:center;gap:14px;border-bottom:3px solid var(--brand);padding-bottom:10px;margin-bottom:12px}
+#printArea .ph img{height:70px;width:auto;max-width:180px;object-fit:contain}
+#printArea .ph h1{font-size:20px;line-height:1.15;color:var(--brand);overflow-wrap:anywhere}
+#printArea .ph>div{min-width:0}
+#printArea .ph p{margin:2px 0 0;font-style:italic;color:#444}
+#printArea h2.pt{font-size:17px;margin:6px 0 10px;text-transform:uppercase;letter-spacing:1px}
+#printArea .meta{display:grid;grid-template-columns:1fr 1fr;gap:4px 20px;margin-bottom:12px}
+#printArea table{min-width:0;width:100%;border-collapse:collapse;margin-bottom:12px}
+#printArea th,#printArea td{border:1px solid #999;padding:6px 8px;font-size:12px;text-align:left}
+#printArea th{background:#e9f0fc;color:#000;text-transform:none;font-size:12px}
+#printArea td.num,#printArea th.num{text-align:right}
+#printArea .sum{margin-left:auto;width:290px}
+#printArea .sum div{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #ccc}
+#printArea .sum .big{font-size:16px;font-weight:bold;color:#b00010;border-bottom:2px solid #000}
+#printArea .sig{display:flex;justify-content:space-between;gap:30px;margin-top:46px}
+#printArea .sig div{flex:1;border-top:1px solid #000;padding-top:4px;font-size:12px}
+#printArea .foot{margin-top:18px;font-size:11px;color:#555;text-align:center}
+#printArea .box{margin:16px 0;padding:12px 14px;border:2px solid;border-radius:10px}
+#printArea .box.ok{border-color:#1a7a3a;background:#eef9f1}
+#printArea .box.bad{border-color:#c0392b;background:#fdf0ef}
+#printArea .box b.t{display:block;margin-bottom:5px;font-size:15px}
+#printArea .box.ok b.t{color:#1a7a3a} #printArea .box.bad b.t{color:#c0392b}
+#printArea .box p{margin:0;font-size:13px} #printArea .box p+p{margin-top:6px}
+#printArea .sum .disc{color:#1a7a3a}
+/* small paper: 4 x 6 inch and A5 */
+#printArea.pp{padding:12mm}
+#printArea.pp.pa-a5{padding:8mm}
+#printArea.pp.pa-4x6{padding:4mm}
+#printArea .contact{margin-top:6px;font-size:12px;font-weight:700;text-align:center;color:#000}
+#printArea.pa-4x6 .contact{font-size:9px;margin-top:3px}
+#printArea.pa-4x6{font-size:10px;line-height:1.3}
+#printArea.pa-4x6 .ph{gap:8px;padding-bottom:6px;margin-bottom:6px;border-bottom-width:2px}
+#printArea.pa-4x6 .ph img{height:38px;max-width:90px}
+#printArea.pa-4x6 .ph h1{font-size:12px}
+#printArea.pa-4x6 .ph p{font-size:9px}
+#printArea.pa-4x6 h2.pt{font-size:11px;margin:4px 0 6px;letter-spacing:.5px}
+#printArea.pa-4x6 .meta{grid-template-columns:1fr;gap:1px;margin-bottom:6px}
+#printArea.pa-4x6 th,#printArea.pa-4x6 td{padding:3px 4px;font-size:9px}
+#printArea.pa-4x6 .c-n,#printArea.pa-4x6 .c-u{display:none}
+#printArea.pa-4x6 table{margin-bottom:6px}
+#printArea.pa-4x6 .sum{width:100%}
+#printArea.pa-4x6 .sum div{padding:2px 0;font-size:10px}
+#printArea.pa-4x6 .sum .big{font-size:12px}
+#printArea.pa-4x6 .box{margin:8px 0;padding:6px 8px}
+#printArea.pa-4x6 .box b.t{font-size:11px;margin-bottom:2px}
+#printArea.pa-4x6 .box p{font-size:9px}
+#printArea.pa-4x6 .sig{margin-top:22px;gap:14px}
+#printArea.pa-4x6 .sig div{font-size:9px}
+#printArea.pa-4x6 .foot{margin-top:8px;font-size:8px}
+#printArea.pa-a5{font-size:11.5px}
+#printArea.pa-a5 .ph img{height:54px}
+#printArea.pa-a5 .ph h1{font-size:16px}
+#printArea.pa-a5 .meta{gap:2px 12px}
+#printArea.pa-a5 th,#printArea.pa-a5 td{padding:4px 6px;font-size:11px}
+#printArea.pa-a5 .sum{width:240px}
+#printArea.pa-a5 .sig{margin-top:30px}
+</style>
+</head>
+<body class="locked">
+
+<header class="top">
+  <div class="brand">
+    <img class="logo" id="logoImg" alt="" style="display:none">
+    <div>
+      <h1 id="brandName"></h1>
+      <small id="brandSlogan"></small>
+    </div>
+  </div>
+  <nav id="nav">
+    <button data-tab="records" class="on">Records</button>
+    <button data-tab="new">+ New Credit</button>
+    <button id="dlBtn">Download</button>
+    <button id="staffBtn" data-tab="staff" class="hide">Staff</button>
+    <button id="logoutBtn" class="hide">Logout</button>
+  </nav>
+</header>
+
+<main>
+  <!-- RECORDS -->
+  <section id="tab-records" class="tab">
+    <div class="stats" id="stats"></div>
+    <div class="panel">
+      <div class="toolbar">
+        <input id="search" type="search" placeholder="Search customer, phone, service, ref...">
+        <select id="statusFilter">
+          <option value="">All statuses</option>
+          <option>Pending</option>
+          <option>Partial</option>
+          <option>Paid</option>
+        </select>
+        <select id="branchFilter" class="hide"><option value="">All branches</option></select>
+        <select id="paperSel" title="Receipt paper size" style="flex:0 0 auto;min-width:0"><option value="a4">Receipt: A4</option><option value="a5">Receipt: A5</option><option value="4x6">Receipt: 4 x 6 inch</option></select>
+        <button class="btn ghost" id="printAll">Print list</button>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Ref</th><th>Date</th><th>Customer</th><th>Served by</th><th>Service</th>
+              <th class="num">Total</th><th class="num">Paid</th><th class="num">Balance</th>
+              <th>Days owing</th><th>Status</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <div id="empty" class="empty hide">
+        <p><b>No records yet.</b></p>
+        <p>Tap <b>+ New Credit</b> when a customer takes a service and will pay later.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- NEW CREDIT -->
+  <section id="tab-new" class="tab hide">
+    <form id="newForm" class="panel" autocomplete="off">
+      <h2>New credit service</h2>
+      <div class="grid">
+        <div class="field">
+          <label for="f-date">Date (automatic)</label>
+          <input id="f-date" readonly tabindex="-1">
+        </div>
+        <div class="field">
+          <label for="f-branch">Branch *</label>
+          <select id="f-branch" required></select>
+        </div>
+        <div class="field">
+          <label for="f-served">Served by (staff) *</label>
+          <input id="f-served" name="servedBy" list="staffList" placeholder="Who gave the service?" required>
+          <datalist id="staffList"></datalist>
+        </div>
+        <div class="field">
+          <label for="f-customer">Customer served *</label>
+          <input id="f-customer" name="customer" placeholder="Customer name" required>
+        </div>
+        <div class="field">
+          <label for="f-phone">Customer phone (optional)</label>
+          <input id="f-phone" name="phone" type="tel" inputmode="tel" placeholder="0772 123 456">
+          <small class="hint">Needed to send the customer a reminder.</small>
+        </div>
+        <div class="field">
+          <label for="f-paid">Paid now (optional, UGX)</label>
+          <input id="f-paid" name="paidNow" type="number" min="0" step="any" inputmode="numeric" placeholder="0">
+        </div>
+      </div>
+
+      <h3>Services given</h3>
+      <div class="items-head"><span>Service</span><span>Quantity</span><span>Amount per quantity</span><span class="r">Amount</span><span></span></div>
+      <div id="items"></div>
+      <datalist id="svcList"></datalist>
+      <button type="button" class="btn ghost" id="addItem">+ Add another service</button>
+
+      <div class="totalbar"><span>Total amount demanded</span><b id="grand">UGX 0</b></div>
+
+      <div class="field">
+        <label for="f-note">Notes (optional)</label>
+        <input id="f-note" name="note" placeholder="Anything to remember">
+      </div>
+
+      <div class="actions">
+        <button class="btn primary big" type="submit">Save</button>
+        <button class="btn ghost" type="button" id="clearForm">Clear</button>
+      </div>
+    </form>
+  </section>
+  <!-- STAFF (admin only) -->
+  <section id="tab-staff" class="tab hide">
+    <form id="staffForm" class="panel" autocomplete="off">
+      <h2>Add staff login</h2>
+      <p class="muted">Create a login for an attendant. They will only see their own branch.</p>
+      <div class="grid">
+        <div class="field"><label for="st-name">Name *</label><input id="st-name" required></div>
+        <div class="field"><label for="st-email">Username *</label><input id="st-email" type="text" autocapitalize="none" placeholder="e.g. lukhonje1" required></div>
+        <div class="field"><label for="st-pass">PIN / password (min 6 characters) *</label><input id="st-pass" type="text" minlength="6" required></div>
+        <div class="field"><label for="st-role">Role *</label>
+          <select id="st-role"><option value="attendant">Attendant (one branch)</option><option value="admin">Admin (all branches)</option></select></div>
+        <div class="field"><label for="st-branch">Branch (for attendants)</label><select id="st-branch"></select></div>
+      </div>
+      <div class="actions"><button class="btn primary" type="submit">Create login</button></div>
+    </form>
+    <div class="panel"><h2>Staff logins</h2><div id="staffRows"></div></div>
+  </section>
+</main>
+
+<!-- Pay dialog -->
+<dialog id="payDlg">
+  <form method="dialog" id="payForm">
+    <h2 id="payTitle">Record payment</h2>
+    <p class="muted" id="payInfo"></p>
+    <div class="field"><label for="p-amt">Amount paid (UGX)</label><input id="p-amt" type="number" min="1" step="any" inputmode="numeric" required></div>
+    <div class="field"><label for="p-meth">Method</label>
+      <select id="p-meth"><option>Cash</option><option>MTN MoMo</option><option>Airtel Money</option><option>Bank</option><option>Other</option></select>
+    </div>
+    <div class="field"><label for="p-ref">Transaction ID / receipt no. (optional)</label><input id="p-ref"></div>
+    <label style="display:flex;gap:8px;align-items:center;margin:6px 0 10px;font-size:14px"><input type="checkbox" id="p-waive" style="width:auto"> Give any remaining balance as a discount</label>
+    <p class="muted">Date is today, automatically.</p>
+    <div class="actions">
+      <button class="btn primary" value="ok">Save payment</button>
+      <button class="btn ghost" value="cancel" formnovalidate>Cancel</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Discount dialog -->
+<dialog id="discDlg">
+  <form method="dialog" id="discForm">
+    <h2 id="discTitle">Give discount</h2>
+    <p class="muted" id="discInfo"></p>
+    <div class="field"><label for="d-amt">Discount amount (UGX)</label><input id="d-amt" type="number" min="1" step="any" inputmode="numeric" required></div>
+    <div class="field"><label for="d-why">Reason (optional)</label><input id="d-why" placeholder="e.g. Loyal customer"></div>
+    <p class="muted">The discount is subtracted from the balance and recorded with your name.</p>
+    <div class="actions">
+      <button class="btn primary" value="ok">Save discount</button>
+      <button class="btn ghost" value="cancel" formnovalidate>Cancel</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Saved dialog -->
+<dialog id="doneDlg">
+  <div id="doneBody"></div>
+  <div class="actions"><button class="btn ghost" id="doneClose">Close</button></div>
+</dialog>
+
+<!-- View dialog -->
+<dialog id="viewDlg">
+  <div id="viewBody"></div>
+  <div class="actions"><button class="btn ghost" id="viewClose">Close</button></div>
+</dialog>
+
+<!-- Download dialog -->
+<dialog id="dlDlg">
+  <h2>Download</h2>
+  <p class="muted">PDF: in the window that opens, choose "Save as PDF" as the printer. Excel file: opens in Excel or Google Sheets.</p>
+  <div class="actions">
+    <button class="btn primary" id="dlPdf">Download PDF</button>
+    <button class="btn ghost" id="dlCsv">Download Excel file</button>
+    <button class="btn ghost" id="dlClose">Close</button>
+  </div>
+</dialog>
+
+
+<!-- Add more service to existing credit -->
+<dialog id="addSvcDlg">
+  <form method="dialog" id="addSvcForm">
+    <h2 id="addSvcTitle">Add service</h2>
+    <p class="muted" id="addSvcInfo"></p>
+    <div class="field">
+      <label for="as-date">Date of this service *</label>
+      <input id="as-date" type="date" required>
+    </div>
+    <div class="field">
+      <label for="as-svc">Service *</label>
+      <input id="as-svc" list="svcList" placeholder="e.g. Printing, Design..." required>
+    </div>
+    <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="field">
+        <label for="as-qty">Quantity *</label>
+        <input id="as-qty" type="number" min="0.01" step="any" value="1" required>
+      </div>
+      <div class="field">
+        <label for="as-prc">Amount per quantity (UGX) *</label>
+        <input id="as-prc" type="number" min="0" step="any" required>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn primary" value="ok">Add to this credit</button>
+      <button class="btn ghost" value="cancel" formnovalidate>Cancel</button>
+    </div>
+  </form>
+</dialog>
+
+<section id="loginPage" class="loginpage">
+  <form id="loginForm" class="panel" autocomplete="on">
+    <img id="loginLogo" alt="" style="display:none;margin:0 auto 12px;max-height:70px;max-width:80%;object-fit:contain">
+    <h2 style="text-align:center">Staff login</h2>
+    <p class="muted">Enter your username and PIN. Your branch opens automatically.</p>
+    <div class="field"><label for="l-email">Username</label><input id="l-email" type="text" autocapitalize="none" autocorrect="off" autocomplete="username" required></div>
+    <div class="field"><label for="l-pass">PIN / password</label><input id="l-pass" type="password" autocomplete="current-password" required></div>
+    <p id="loginErr" class="muted" style="color:var(--red);font-weight:600"></p>
+    <div class="actions"><button class="btn primary" type="submit">Sign in</button></div>
+  </form>
+</section>
+
+<div id="printArea"></div>
+<div id="toast" class="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ======== COMPANY & WHO RECEIVES THE DETAILS (edit here if needed) ======== */
+  const COMPANY = {
+    logo: 'ab signs.jpg',                               /* picture file uploaded next to index.html in GitHub */
+    name: 'AB SIGNS MEDIA UGANDA',                      /* shown in header, receipts, messages */
+    slogan: 'For quality life time memory',
+    contact: 'Contact us on +256 788 002309 / +256 763147213',   /* last line of every receipt */
+    advert: 'Photography - Printing - Branding - Weddings & Events - Media services. Tell a friend about us!'   /* shown on paid receipts */
+  };
+  const SEND_TO = [
+    { key: 'abraham', label: 'Abraham (CEO)', wa: 'https://wa.me/message/JKDTCAO5LURJE1', waCopy: true, sms: '0788002309' },
+    { key: 'kasim',   label: 'Kasim (Staff)', wa: 'https://wa.me/256763147213',            waCopy: false, sms: '0763147213' }
+  ];
+
+  /* ======== storage ======== */
+  /* ======== BRANCHES (change the names here; never change a key once in use) ======== */
+  const BRANCHES = [
+    { key: 'main', code: 'BUW', name: 'Main Branch - Buwangani Town Council' },
+    { key: 'b1',   code: 'LUK', name: 'Branch 1 - Lukhonje Bukigai' },
+    { key: 'b2',   code: 'KON', name: 'Branch 2 - Konokoyi Bushika' },
+    { key: 'b3',   code: 'KIB', name: 'Branch 3 - Kibanda Bulamuli' }
+  ];
+
+  /* ======== ONLINE DATABASE (Firebase) - paste your config here ======== */
+  const FIREBASE_CONFIG = {
+    apiKey: "AIzaSyDuh258eiJsOK05BHClyWlM_OC30PdjReQ",
+    authDomain: "ab-signs-uganda-credit-tracker.firebaseapp.com",
+    databaseURL: "https://ab-signs-uganda-credit-tracker-default-rtdb.firebaseio.com",
+    projectId: "ab-signs-uganda-credit-tracker"
+  };
+  const K_OLD = 'creditTracker.data.v1', K_STAFF = 'creditTracker.lastStaff';
+  let data = { records: [] };
+  let db = null, profile = null, dataRef = null;
+  const toEmail = u => { u = String(u || '').trim().toLowerCase(); return u.indexOf('@') >= 0 ? u : u + '@abmedia.local'; };
+  const isAdmin = () => !!profile && profile.role === 'admin';
+  const branchName = k => { const b = BRANCHES.filter(x => x.key === k)[0]; return b ? b.name : (k || '-'); };
+  const dbErr = e => { console.error(e); toast('Could not save online. Check internet and try again.'); };
+  const recPath = r => 'credit/' + r.branch + '/records/' + r.id;
+  const saveRec = r => { if (!db) { toast('Online database is not set up yet.'); return; } db.ref(recPath(r)).set(r).catch(dbErr); };
+  const delRec = r => { if (!db) { toast('Online database is not set up yet.'); return; } db.ref(recPath(r)).remove().catch(dbErr); };
+
+  /* ======== helpers ======== */
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const fmt = n => Math.round(n).toLocaleString('en-US');
+  const pd = s => { const p = s.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); };
+  const iso = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const dshow = d => d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  const dlong = d => d.toLocaleDateString('en-GB', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+  const today = () => { const t = new Date(); return new Date(t.getFullYear(), t.getMonth(), t.getDate()); };
+  const find = id => data.records.filter(r => r.id === id)[0];
+  const plural = n => n + (n === 1 ? ' day' : ' days');
+  const tshow = ms => new Date(ms).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  const dtnow = () => dlong(today()) + ', ' + tshow(Date.now());
+  const pdt = p => dshow(pd(p.date)) + (p.at ? ', ' + tshow(p.at) : '');
+
+  let toastTimer;
+  function toast(msg) {
+    const t = $('toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+  }
+  function waNumber(p) {
+    let d = String(p || '').replace(/\D/g, '');
+    if (!d) return '';
+    if (d.charAt(0) === '0') d = '256' + d.slice(1);
+    return d;
+  }
+  function copyText(t) {
+    const fallback = () => {
+      const a = document.createElement('textarea'); a.value = t; a.style.position = 'fixed'; a.style.opacity = '0';
+      document.body.appendChild(a); a.select(); try { document.execCommand('copy'); } catch (e) {} a.remove();
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).catch(fallback); else fallback();
+  }
+
+  /* ======== calculations ======== */
+  function itemDate(i, r) {
+    return i.date || r.date;
+  }
+  function earliestDate(r) {
+    if (!r.items || !r.items.length) return r.date;
+    let earliest = itemDate(r.items[0], r);
+    r.items.forEach(i => {
+      const d = itemDate(i, r);
+      if (d < earliest) earliest = d;
+    });
+    return earliest;
+  }
+  function calc(r) {
+    const total = r.items.reduce((s, i) => s + i.qty * i.price, 0);
+    const paid = r.payments.reduce((s, p) => s + p.amount, 0);
+    const discount = (r.discounts || []).reduce((s, d) => s + d.amount, 0);
+    const bal = total - paid - discount;
+    const status = bal <= 0.5 ? 'Paid' : ((paid + discount) > 0 ? 'Partial' : 'Pending');
+    const start = earliestDate(r);
+    const days = status === 'Paid' ? 0 : Math.max(0, Math.round((today() - pd(start)) / 86400000));
+    return { total, paid, discount, bal, status, days, start };
+  }
+
+  /* ======== messages ======== */
+  function recordText(r, wa) {
+    const c = calc(r), b = s => wa ? '*' + s + '*' : s, L = [];
+    L.push(b('NEW CREDIT SERVICE - ' + COMPANY.name));
+    L.push('Ref: ' + r.id);
+    L.push('Branch: ' + branchName(r.branch));
+    L.push('Date: ' + dshow(pd(r.date)));
+    L.push('Customer: ' + r.customer + (r.phone ? ' (' + r.phone + ')' : ''));
+    L.push('Served by: ' + r.servedBy);
+    L.push('');
+    L.push(b('Services:'));
+    r.items.forEach((i, n) => L.push((n + 1) + '. ' + i.service + ' - ' + i.qty + ' x ' + fmt(i.price) + ' = ' + fmt(i.qty * i.price)));
+    L.push('');
+    L.push('Total: UGX ' + fmt(c.total));
+    L.push('Paid: UGX ' + fmt(c.paid));
+    if (c.discount > 0) L.push('Discount: UGX ' + fmt(c.discount));
+    L.push(b('Remaining balance: UGX ' + fmt(c.bal)));
+    if (c.status !== 'Paid') L.push('Days owing: ' + plural(c.days));
+    if (r.note) L.push('Note: ' + r.note);
+    return L.join('\n');
+  }
+  function reminderText(r) {
+    const c = calc(r), L = [];
+    L.push('Hello ' + r.customer + ', this is ' + COMPANY.name + ' (' + branchName(r.branch) + ').');
+    L.push('');
+    L.push('Total amount: UGX ' + fmt(c.total));
+    L.push('Total paid: UGX ' + fmt(c.paid));
+    if (c.discount > 0) L.push('Discount: UGX ' + fmt(c.discount));
+    L.push('Remaining balance: UGX ' + fmt(c.bal));
+    L.push(c.days === 0
+      ? 'You received the service today (' + dshow(pd(r.date)) + ').'
+      : 'It has been ' + plural(c.days) + ' since you received the service on ' + dshow(pd(r.date)) + '.');
+    L.push('');
+    L.push('Please pay the remaining balance as soon as possible. Thank you.');
+    L.push(COMPANY.slogan);
+    return L.join('\n');
+  }
+
+  /* ======== sending (buttons) ======== */
+  function sendBlock(r) {
+    return SEND_TO.map(p =>
+      '<div class="sendrow"><b>Send to ' + esc(p.label) + '</b><div class="actions">' +
+      '<button class="btn wa sm" data-act="send" data-rid="' + esc(r.id) + '" data-who="' + p.key + '" data-ch="wa">WhatsApp</button>' +
+      '<button class="btn ghost sm" data-act="send" data-rid="' + esc(r.id) + '" data-who="' + p.key + '" data-ch="sms">SMS</button>' +
+      '</div></div>').join('');
+  }
+  function doSend(r, whoKey, ch) {
+    const p = SEND_TO.filter(x => x.key === whoKey)[0]; if (!p) return;
+    if (ch === 'sms') {
+      window.location.href = 'sms:' + p.sms + '?&body=' + encodeURIComponent(recordText(r, false));
+    } else if (p.waCopy) {
+      copyText(recordText(r, true));
+      toast('Message copied. Paste it in the WhatsApp chat and press send.');
+      window.open(p.wa, '_blank');
+    } else {
+      window.open(p.wa + '?text=' + encodeURIComponent(recordText(r, true)), '_blank');
+    }
+  }
+  function doRemind(r, ch) {
+    const text = reminderText(r), num = waNumber(r.phone);
+    if (ch === 'wa') window.open('https://wa.me/' + (num ? num : '') + '?text=' + encodeURIComponent(text), '_blank');
+    else if (ch === 'sms') {
+      if (!r.phone) { toast('This customer has no phone number.'); return; }
+      window.location.href = 'sms:' + r.phone.replace(/[^\d+]/g, '') + '?&body=' + encodeURIComponent(text);
+    } else { copyText(text); toast('Reminder message copied.'); }
+  }
+
+  /* ======== printing ======== */
+  function printHead(title) {
+    return '<div class="ph">' + (logoOk ? '<img src="' + esc($('logoImg').src) + '" alt="">' : '') + '<div><h1>' + esc(COMPANY.name) + '</h1><p>' + esc(COMPANY.slogan) + '</p></div></div>' +
+      '<h2 class="pt">' + title + '</h2>';
+  }
+  const PAPERS = {
+    a4:   { cls: 'pp',        page: 'size:A4;margin:0' },
+    a5:   { cls: 'pp pa-a5',  page: 'size:A5;margin:0' },
+    '4x6':{ cls: 'pp pa-4x6', page: 'size:4in 6in;margin:0' },
+    list: { cls: '',          page: 'size:A4;margin:12mm' }
+  };
+  let paper = 'a4';
+  try { paper = localStorage.getItem('creditTracker.paper') || 'a4'; } catch (e) {}
+  if (!PAPERS[paper]) paper = 'a4';
+  $('paperSel').value = paper;
+  $('paperSel').addEventListener('change', () => {
+    paper = $('paperSel').value;
+    try { localStorage.setItem('creditTracker.paper', paper); } catch (e) {}
+  });
+  let oldTitle = '';
+  function printNow(html, kind, title) {
+    const pp = PAPERS[kind === 'list' ? 'list' : paper];
+    let st = $('pageStyle');
+    if (!st) { st = document.createElement('style'); st.id = 'pageStyle'; document.head.appendChild(st); }
+    st.textContent = '@page{' + pp.page + '}';
+    $('printArea').className = pp.cls;
+    $('printArea').innerHTML = html;
+    oldTitle = document.title; if (title) document.title = title;
+    setTimeout(() => window.print(), 80);
+  }
+  window.addEventListener('afterprint', () => { $('printArea').innerHTML = ''; if (oldTitle) document.title = oldTitle; });
+
+  function printRecord(r) {
+    const c = calc(r);
+    const isPaid = c.status === 'Paid';
+
+    let h = printHead((isPaid ? 'Payment Receipt' : 'Credit Statement') + ' - ' + esc(branchName(r.branch))) +
+      '<div class="meta"><div><b>Ref:</b> ' + esc(r.id) + '</div><div><b>First service:</b> ' + dshow(pd(c.start)) + (r.createdAt && c.start === r.date ? ', ' + tshow(r.createdAt) : '') + '</div>' +
+      '<div><b>Customer:</b> ' + esc(r.customer) + '</div><div><b>Phone:</b> ' + esc(r.phone || '-') + '</div>' +
+      '<div><b>Served by:</b> ' + esc(r.servedBy) + '</div><div><b>Status:</b> ' + c.status + '</div>' +
+      '<div><b>Branch:</b> ' + esc(branchName(r.branch)) + '</div><div><b>Receipt date &amp; time:</b> ' + dtnow() + '</div></div>' +
+      '<table><thead><tr><th class="c-n">#</th><th>Date</th><th>Service</th><th class="num">Qty</th><th class="num c-u">Unit price</th><th class="num">Amount (UGX)</th></tr></thead><tbody>' +
+      r.items.map((i, n) => '<tr><td class="c-n">' + (n + 1) + '</td><td>' + dshow(pd(itemDate(i, r))) + '</td><td>' + esc(i.service) + '</td><td class="num">' + i.qty + '</td><td class="num c-u">' + fmt(i.price) + '</td><td class="num">' + fmt(i.qty * i.price) + '</td></tr>').join('') +
+      '</tbody></table>';
+
+    if (r.payments.length) {
+      h += '<table><thead><tr><th>Payment date</th><th>Method</th><th>Reference</th><th class="num">Amount (UGX)</th></tr></thead><tbody>' +
+        r.payments.map(p => '<tr><td>' + pdt(p) + '</td><td>' + esc(p.method) + '</td><td>' + esc(p.ref || '') + '</td><td class="num">' + fmt(p.amount) + '</td></tr>').join('') + '</tbody></table>';
+    }
+
+    h += '<div class="sum"><div><span>Total</span><b>UGX ' + fmt(c.total) + '</b></div><div><span>Paid</span><b>UGX ' + fmt(c.paid) + '</b></div>' +
+      (c.discount > 0 ? '<div class="disc"><span>Discount</span><b>- UGX ' + fmt(c.discount) + '</b></div>' : '') +
+      '<div class="big"><span>Remaining balance</span><span>UGX ' + fmt(Math.max(c.bal, 0)) + '</span></div>' +
+      (!isPaid ? '<div><span>Days owing</span><b>' + plural(c.days) + '</b></div>' : '') + '</div>';
+
+    if (isPaid) {
+      h += '<div class="box ok"><b class="t">Thank you for your payment!</b>' +
+        '<p>We sincerely appreciate your business. It was a pleasure serving you, and we look forward to serving you again.</p>' +
+        '<p><i>' + esc(COMPANY.slogan) + '</i></p>' +
+        (COMPANY.advert ? '<p><b>' + esc(COMPANY.advert) + '</b></p>' : '') + '</div>';
+    } else {
+      h += '<div class="box bad"><b class="t">Payment still outstanding</b>' +
+        '<p>The remaining balance of <b>UGX ' + fmt(Math.max(c.bal, 0)) + '</b> is not yet paid. ' +
+        (c.days > 0 ? 'It has been <b>' + plural(c.days) + '</b> since the first service. ' : '') +
+        'Please settle the outstanding amount as soon as possible. Thank you for your understanding.</p></div>';
+    }
+
+    h += (r.note ? '<p><b>Note:</b> ' + esc(r.note) + '</p>' : '') +
+      '<div class="sig"><div>Served by: ' + esc(r.servedBy) + '</div><div>Customer signature</div></div>' +
+      '<p class="foot">Printed on ' + dtnow() + ' - ' + esc(COMPANY.name) + '</p>' +
+      (COMPANY.contact ? '<p class="contact">' + esc(COMPANY.contact) + '</p>' : '');
+    printNow(h, 'receipt', (isPaid ? 'Receipt' : 'Credit Statement') + ' - ' + r.id + ' - ' + r.customer);
+  }
+
+  function filtered() {
+    const q = $('search').value.trim().toLowerCase(), sf = $('statusFilter').value, bf = $('branchFilter').value;
+    return data.records.slice().reverse().filter(r => {
+      const c = calc(r);
+      if (sf && c.status !== sf) return false;
+      if (bf && r.branch !== bf) return false;
+      const hay = (r.id + ' ' + r.customer + ' ' + (r.phone || '') + ' ' + r.servedBy + ' ' + r.items.map(i => i.service).join(' ')).toLowerCase();
+      return !q || hay.indexOf(q) >= 0;
+    });
+  }
+  function printList() {
+    const list = filtered();
+    if (!list.length) { toast('There are no records to print.'); return; }
+    let t = 0, p = 0;
+    let h = printHead('Credit records') + '<p>As at ' + dtnow() + '</p>' +
+      '<table><thead><tr><th>Ref</th><th>Date</th><th>Customer</th><th>Served by</th><th>Service</th><th class="num">Total</th><th class="num">Paid</th><th class="num">Balance</th><th>Days owing</th><th>Status</th></tr></thead><tbody>';
+    list.forEach(r => {
+      const c = calc(r); t += c.total; p += c.paid;
+      h += '<tr><td>' + esc(r.id) + '</td><td>' + dshow(pd(r.date)) + '</td><td>' + esc(r.customer) + (r.phone ? '<br>' + esc(r.phone) : '') + '</td><td>' + esc(r.servedBy) + '</td><td>' +
+        esc(r.items.map(i => i.service + ' x' + i.qty).join(', ')) + '</td><td class="num">' + fmt(c.total) + '</td><td class="num">' + fmt(c.paid) + '</td><td class="num">' + fmt(Math.max(c.bal, 0)) +
+        '</td><td>' + (c.status === 'Paid' ? '-' : plural(c.days)) + '</td><td>' + c.status + '</td></tr>';
+    });
+    h += '<tr><td colspan="5"><b>TOTAL</b></td><td class="num"><b>' + fmt(t) + '</b></td><td class="num"><b>' + fmt(p) + '</b></td><td class="num"><b>' + fmt(Math.max(t - p, 0)) + '</b></td><td colspan="2"></td></tr></tbody></table>';
+    printNow(h, 'list', 'Credit records - ' + iso(today()));
+  }
+
+  /* ======== records screen ======== */
+  function ageClass(d) { return d >= 30 ? 'age3' : (d >= 7 ? 'age2' : 'age1'); }
+  function render() {
+    let given = 0, collected = 0, owed = 0, unpaid = 0;
+    data.records.forEach(r => { const c = calc(r); given += c.total; collected += c.paid; owed += Math.max(c.bal, 0); if (c.status !== 'Paid') unpaid++; });
+    $('stats').innerHTML =
+      '<div class="stat"><small>Total on credit (UGX)</small><b>' + fmt(given) + '</b></div>' +
+      '<div class="stat ok"><small>Collected (UGX)</small><b>' + fmt(collected) + '</b></div>' +
+      '<div class="stat red"><small>Still owed (UGX)</small><b>' + fmt(owed) + '</b></div>' +
+      '<div class="stat warn"><small>Customers owing</small><b>' + unpaid + '</b></div>';
+
+    const list = filtered();
+    $('rows').innerHTML = list.map(r => {
+      const c = calc(r), id = esc(r.id);
+      const first = r.items[0].service + (r.items.length > 1 ? ' +' + (r.items.length - 1) + ' more' : '');
+      return '<tr><td>' + id + '<small>' + esc(branchName(r.branch)) + '</small></td><td>' + dshow(pd(r.date)) + '</td>' +
+        '<td><b>' + esc(r.customer) + '</b>' + (r.phone ? '<small>' + esc(r.phone) + '</small>' : '') + '</td>' +
+        '<td>' + esc(r.servedBy) + '</td><td>' + esc(first) + '</td>' +
+        '<td class="num">' + fmt(c.total) + '</td><td class="num">' + fmt(c.paid) + '</td><td class="num"><b>' + fmt(Math.max(c.bal, 0)) + '</b></td>' +
+        '<td>' + (c.status === 'Paid' ? '-' : '<span class="age ' + ageClass(c.days) + '">' + plural(c.days) + '</span>') + '</td>' +
+        '<td><span class="tag ' + c.status + '">' + c.status + '</span></td>' +
+        '<td class="act">' +
+          (c.status !== 'Paid' ? '<button class="btn sm primary" data-act="addsvc" data-rid="' + id + '">+ Add</button>' : '') +
+          (c.status !== 'Paid' ? '<button class="btn sm ok" data-act="pay" data-rid="' + id + '">Pay</button>' : '') +
+          (c.status !== 'Paid' ? '<button class="btn sm ghost" data-act="disc" data-rid="' + id + '">Discount</button>' : '') +
+          '<button class="btn sm" data-act="view" data-rid="' + id + '">View</button>' +
+          '<button class="btn sm ghost" data-act="print" data-rid="' + id + '">Print</button>' +
+          (isAdmin() ? '<button class="btn sm red" data-act="del" data-rid="' + id + '">Delete</button>' : '') +
+        '</td></tr>';
+    }).join('');
+    $('empty').classList.toggle('hide', list.length > 0);
+
+    const staff = {}, svc = {};
+    data.records.forEach(r => { staff[r.servedBy] = 1; r.items.forEach(i => { svc[i.service] = 1; }); });
+    $('staffList').innerHTML = Object.keys(staff).map(s => '<option value="' + esc(s) + '">').join('');
+    $('svcList').innerHTML = Object.keys(svc).map(s => '<option value="' + esc(s) + '">').join('');
+  }
+
+  function switchTab(t) {
+    document.querySelectorAll('#nav button[data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
+    document.querySelectorAll('.tab').forEach(s => s.classList.add('hide'));
+    $('tab-' + t).classList.remove('hide');
+    if (t === 'new') $('f-date').value = dlong(today());
+    if (t === 'staff') loadStaff();
+    window.scrollTo(0, 0);
+  }
+
+  /* ======== new credit form ======== */
+  function addRow() {
+    const row = document.createElement('div');
+    row.className = 'item';
+    row.innerHTML =
+      '<input class="i-svc" list="svcList" placeholder="Service (e.g. Printing)" aria-label="Service" required>' +
+      '<input class="i-qty" type="number" min="0.01" step="any" value="1" placeholder="Qty" aria-label="Quantity" inputmode="decimal" required>' +
+      '<input class="i-prc" type="number" min="0" step="any" placeholder="Amount each" aria-label="Amount per quantity" inputmode="numeric" required>' +
+      '<output class="i-tot">0</output><button type="button" class="x" aria-label="Remove">&times;</button>';
+    $('items').appendChild(row);
+    totals();
+  }
+  function totals() {
+    let g = 0;
+    document.querySelectorAll('#items .item').forEach(row => {
+      const q = parseFloat(row.querySelector('.i-qty').value) || 0, p = parseFloat(row.querySelector('.i-prc').value) || 0;
+      row.querySelector('.i-tot').textContent = fmt(q * p); g += q * p;
+    });
+    $('grand').textContent = 'UGX ' + fmt(g);
+  }
+  function readItems() {
+    const out = [];
+    document.querySelectorAll('#items .item').forEach(row => {
+      const service = row.querySelector('.i-svc').value.trim();
+      const qty = parseFloat(row.querySelector('.i-qty').value), price = parseFloat(row.querySelector('.i-prc').value);
+      if (service && qty > 0 && price >= 0) out.push({ service, qty, price, date: iso(today()) });
+    });
+    return out;
+  }
+  function resetForm() {
+    $('newForm').reset();
+    $('items').innerHTML = ''; addRow();
+    $('f-date').value = dlong(today());
+    try { $('f-served').value = (profile && profile.name) || localStorage.getItem(K_STAFF) || ''; } catch (e) {}
+    totals();
+  }
+  $('addItem').onclick = addRow;
+  $('clearForm').onclick = resetForm;
+  $('items').addEventListener('input', totals);
+  $('items').addEventListener('click', e => {
+    if (!e.target.classList.contains('x')) return;
+    if (document.querySelectorAll('#items .item').length > 1) { e.target.closest('.item').remove(); totals(); }
+    else toast('At least one service is needed.');
+  });
+
+  $('newForm').addEventListener('submit', e => {
+    e.preventDefault();
+    if (!db || !profile) { toast('Please sign in first.'); return; }
+    const br = BRANCHES.filter(x => x.key === $('f-branch').value)[0];
+    if (!br) { toast('Choose the branch.'); return; }
+    const items = readItems();
+    if (!items.length) { toast('Add at least one service with quantity and amount.'); return; }
+    const f = e.target;
+    const now = Date.now();
+    const base = {
+      branch: br.key, date: iso(today()), createdAt: now,
+      servedBy: f.servedBy.value.trim(), customer: f.customer.value.trim(), phone: f.phone.value.trim(),
+      note: f.note.value.trim(), items: items, payments: []
+    };
+    const paidNow = parseFloat(f.paidNow.value) || 0;
+    if (paidNow > 0) base.payments.push({ date: base.date, at: now, amount: paidNow, method: 'Cash', ref: '', note: 'Paid at service', by: profile.name || '' });
+    db.ref('credit/' + br.key + '/seq').transaction(n => (n || 0) + 1).then(res => {
+      const n = res.snapshot.val();
+      const rec = Object.assign({ id: br.code + '-' + String(n).padStart(3, '0') }, base);
+      return db.ref(recPath(rec)).set(rec).then(() => rec);
+    }).then(rec => {
+      try { localStorage.setItem(K_STAFF, rec.servedBy); } catch (er) {}
+      resetForm(); switchTab('records');
+      const c = calc(rec);
+      $('doneBody').innerHTML = '<h2>Saved: ' + esc(rec.id) + '</h2>' +
+        '<p class="muted">' + esc(rec.customer) + ' - total UGX ' + fmt(c.total) + ', balance UGX ' + fmt(c.bal) + '</p>' +
+        sendBlock(rec) +
+        '<p class="muted">For Abraham on WhatsApp the message is copied for you. Just paste it in the chat and press send.</p>' +
+        '<div class="actions"><button class="btn ghost" data-act="print" data-rid="' + esc(rec.id) + '">Print</button></div>';
+      $('doneDlg').showModal();
+    }).catch(dbErr);
+  });
+
+  /* ======== actions (one handler for all buttons) ======== */
+  let payFor = null;
+  let addFor = null;
+  let discFor = null;
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-act]'); if (!b) return;
+    const r = find(b.dataset.rid); if (!r) return;
+    const a = b.dataset.act;
+    if (a === 'send') doSend(r, b.dataset.who, b.dataset.ch);
+    else if (a === 'remind') doRemind(r, b.dataset.ch);
+    else if (a === 'print') printRecord(r);
+    else if (a === 'view') viewRecord(r);
+    else if (a === 'addsvc') {
+      addFor = r.id;
+      const c = calc(r);
+      $('addSvcTitle').textContent = 'Add service for ' + r.customer;
+      $('addSvcInfo').textContent = r.id + ' — current balance UGX ' + fmt(c.bal);
+      $('as-date').value = iso(today());
+      $('as-svc').value = '';
+      $('as-qty').value = '1';
+      $('as-prc').value = '';
+      $('addSvcDlg').showModal();
+    }
+    else if (a === 'disc') {
+      const c = calc(r); discFor = r.id;
+      $('discTitle').textContent = 'Discount for ' + r.customer;
+      $('discInfo').textContent = r.id + ' - remaining balance UGX ' + fmt(c.bal);
+      $('d-amt').value = Math.round(c.bal); $('d-amt').max = Math.ceil(c.bal); $('d-why').value = '';
+      if ($('viewDlg').open) $('viewDlg').close();
+      $('discDlg').showModal();
+    }
+    else if (a === 'pay') {
+      const c = calc(r); payFor = r.id;
+      $('p-waive').checked = false;
+      $('payTitle').textContent = 'Payment from ' + r.customer;
+      $('payInfo').textContent = r.id + ' - remaining balance UGX ' + fmt(c.bal);
+      $('p-amt').value = Math.round(c.bal); $('p-amt').max = Math.ceil(c.bal); $('p-ref').value = '';
+      $('payDlg').showModal();
+    } else if (a === 'del') {
+      if (!isAdmin()) { toast('Only an admin can delete records.'); return; }
+      if (confirm('Delete ' + r.id + ' for ' + r.customer + '? This cannot be undone.')) {
+        delRec(r);
+      }
+    }
+  });
+  $('payForm').addEventListener('submit', e => {
+    if (!e.submitter || e.submitter.value !== 'ok') { payFor = null; return; }
+    const r = find(payFor); if (!r) return;
+    r.payments.push({ date: iso(today()), at: Date.now(), amount: parseFloat($('p-amt').value), method: $('p-meth').value, ref: $('p-ref').value.trim(), note: '', by: (profile && profile.name) || '' });
+    r.discounts = r.discounts || [];
+    if ($('p-waive').checked) {
+      const left = calc(r).bal;
+      if (left > 0.5) r.discounts.push({ date: iso(today()), at: Date.now(), amount: Math.round(left * 100) / 100, reason: 'Balance waived at payment', by: (profile && profile.name) || '' });
+    }
+    saveRec(r); toast('Payment recorded.');
+  });
+  $('discForm').addEventListener('submit', e => {
+    if (!e.submitter || e.submitter.value !== 'ok') { discFor = null; return; }
+    const r = find(discFor); if (!r) return;
+    const c = calc(r), amt = parseFloat($('d-amt').value);
+    if (!(amt > 0) || amt > c.bal + 0.5) { toast('Discount cannot be more than the balance.'); return; }
+    r.discounts = r.discounts || [];
+    r.discounts.push({ date: iso(today()), at: Date.now(), amount: amt, reason: $('d-why').value.trim(), by: (profile && profile.name) || '' });
+    saveRec(r); toast('Discount saved.');
+  });
+  $('addSvcForm').addEventListener('submit', e => {
+    if (!e.submitter || e.submitter.value !== 'ok') { addFor = null; return; }
+    const r = find(addFor); if (!r) return;
+    const service = $('as-svc').value.trim();
+    const qty = parseFloat($('as-qty').value);
+    const price = parseFloat($('as-prc').value);
+    const date = $('as-date').value;
+    if (!service || !(qty > 0) || !(price >= 0) || !date) {
+      toast('Please fill service, quantity, amount and date.');
+      e.preventDefault();
+      return;
+    }
+    r.items.push({ service, qty, price, date });
+    saveRec(r);
+    toast('Service added. New balance updated.');
+    setTimeout(() => viewRecord(r), 200);
+  });
+
+  function viewRecord(r) {
+    const c = calc(r), id = esc(r.id);
+    let h = '<h2>' + id + ' - ' + esc(r.customer) + '</h2><span class="tag ' + c.status + '">' + c.status + '</span>' +
+      '<div class="kv"><span>First service</span><div>' + dshow(pd(c.start)) + '</div>' +
+      '<span>Branch</span><div>' + esc(branchName(r.branch)) + '</div>' +
+      '<span>Served by</span><div>' + esc(r.servedBy) + '</div>' +
+      '<span>Phone</span><div>' + esc(r.phone || '-') + '</div>' +
+      (c.status !== 'Paid' ? '<span>Days owing</span><div><b>' + plural(c.days) + '</b></div>' : '') +
+      (r.note ? '<span>Note</span><div>' + esc(r.note) + '</div>' : '') + '</div>' +
+      '<h3>Services</h3><table class="mini"><tbody>' +
+      r.items.map(i => '<tr><td>' + dshow(pd(itemDate(i, r))) + '</td><td>' + esc(i.service) + '</td><td>' + i.qty + ' x ' + fmt(i.price) + '</td><td style="text-align:right">' + fmt(i.qty * i.price) + '</td></tr>').join('') +
+      '<tr><td colspan="3"><b>Total</b></td><td style="text-align:right"><b>' + fmt(c.total) + '</b></td></tr>' +
+      '<tr><td colspan="3">Paid</td><td style="text-align:right">' + fmt(c.paid) + '</td></tr>' +
+      (c.discount > 0 ? '<tr><td colspan="3">Discount</td><td style="text-align:right">- ' + fmt(c.discount) + '</td></tr>' : '') +
+      '<tr><td colspan="3"><b>Remaining</b></td><td style="text-align:right"><b>' + fmt(Math.max(c.bal, 0)) + '</b></td></tr></tbody></table>';
+
+    if (c.status !== 'Paid') {
+      h += '<div class="actions" style="margin:12px 0;"><button class="btn primary" data-act="addsvc" data-rid="' + id + '">+ Add another service</button>' +
+        '<button class="btn ghost" data-act="disc" data-rid="' + id + '">Give discount</button></div>';
+    }
+
+    if (r.payments.length) {
+      h += '<h3>Payments</h3><table class="mini"><tbody>' + r.payments.map(p =>
+        '<tr><td>' + pdt(p) + '</td><td>' + esc(p.method) + (p.ref ? ' ' + esc(p.ref) : '') + '</td><td style="text-align:right">' + fmt(p.amount) + '</td></tr>').join('') + '</tbody></table>';
+    }
+    if ((r.discounts || []).length) {
+      h += '<h3>Discounts</h3><table class="mini"><tbody>' + r.discounts.map(d =>
+        '<tr><td>' + pdt(d) + '</td><td>' + esc(d.reason || 'Discount') + (d.by ? ' (' + esc(d.by) + ')' : '') + '</td><td style="text-align:right">- ' + fmt(d.amount) + '</td></tr>').join('') + '</tbody></table>';
+    }
+    if (c.status !== 'Paid') {
+      h += '<h3>Remind the customer</h3><div class="msgbox">' + esc(reminderText(r)) + '</div><div class="actions">' +
+        '<button class="btn wa sm" data-act="remind" data-ch="wa" data-rid="' + id + '">WhatsApp</button>' +
+        (r.phone ? '<button class="btn ghost sm" data-act="remind" data-ch="sms" data-rid="' + id + '">SMS</button>' : '') +
+        '<button class="btn ghost sm" data-act="remind" data-ch="copy" data-rid="' + id + '">Copy</button></div>' +
+        (r.phone ? '' : '<p class="muted">No phone saved. WhatsApp will let you pick the contact.</p>');
+    }
+    h += '<h3>Send details</h3>' + sendBlock(r) +
+      '<div class="actions"><button class="btn ghost" data-act="print" data-rid="' + id + '">Print / Save as PDF</button></div>';
+    $('viewBody').innerHTML = h;
+    $('viewDlg').showModal();
+  }
+
+  /* ======== download ======== */
+  function download(name, text, type) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['﻿' + text], { type: type }));
+    a.download = name; document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+  $('dlBtn').onclick = () => $('dlDlg').showModal();
+  $('dlClose').onclick = () => $('dlDlg').close();
+  $('dlPdf').onclick = () => { $('dlDlg').close(); printList(); };
+  $('dlCsv').onclick = () => {
+    const rows = [['Ref', 'Branch', 'Date', 'Customer', 'Phone', 'Served by', 'Services', 'Total', 'Paid', 'Discount', 'Balance', 'Days owing', 'Status']];
+    data.records.forEach(r => {
+      const c = calc(r);
+      rows.push([r.id, branchName(r.branch), r.date, r.customer, r.phone, r.servedBy, r.items.map(i => i.service + ' ' + i.qty + 'x' + i.price).join('; '),
+        Math.round(c.total), Math.round(c.paid), Math.round(c.discount), Math.round(c.bal), c.status === 'Paid' ? '' : c.days, c.status]);
+    });
+    download('ab-signs-credit-records-' + iso(today()) + '.csv',
+      rows.map(row => row.map(x => '"' + String(x == null ? '' : x).replace(/"/g, '""') + '"').join(',')).join('\n'), 'text/csv');
+    $('dlDlg').close();
+  };
+
+  /* ======== wiring ======== */
+  $('doneClose').onclick = () => $('doneDlg').close();
+  $('viewClose').onclick = () => $('viewDlg').close();
+  $('printAll').onclick = printList;
+  $('search').addEventListener('input', render);
+  $('statusFilter').addEventListener('change', render);
+  $('branchFilter').addEventListener('change', render);
+  $('nav').addEventListener('click', e => { if (e.target.dataset.tab) switchTab(e.target.dataset.tab); });
+
+  let logoOk = false;
+  (function () {
+    const img = $('logoImg'), url = encodeURI(COMPANY.logo);
+    img.onload = () => { logoOk = true; img.style.display = ''; $('loginLogo').src = url; $('loginLogo').style.display = 'block'; $('favicon').href = url; };
+    img.onerror = () => { logoOk = false; img.style.display = 'none'; $('loginLogo').style.display = 'none'; };
+    img.src = url;
+  })();
+  $('brandName').textContent = COMPANY.name; $('brandSlogan').textContent = COMPANY.slogan; document.title = COMPANY.name;
+  resetForm();
+  render();
+
+  /* ======== go online ======== */
+  let started = false;
+  function applyProfile() {
+    const mine = isAdmin() ? BRANCHES : BRANCHES.filter(x => x.key === profile.branch);
+    const opts = mine.map(x => '<option value="' + esc(x.key) + '">' + esc(x.name) + '</option>').join('');
+    $('f-branch').innerHTML = (isAdmin() ? '<option value="">Choose branch</option>' : '') + opts;
+    $('branchFilter').innerHTML = '<option value="">All branches</option>' + opts;
+    $('st-branch').innerHTML = BRANCHES.map(x => '<option value="' + esc(x.key) + '">' + esc(x.name) + '</option>').join('');
+    $('branchFilter').classList.toggle('hide', !isAdmin());
+    $('staffBtn').classList.toggle('hide', !isAdmin());
+    $('logoutBtn').classList.remove('hide');
+    $('logoutBtn').textContent = 'Logout (' + (profile.name || 'me') + ')';
+    resetForm();
+  }
+  function ingest(key, v, out) {
+    Object.keys((v && v.records) || {}).forEach(k => {
+      const r = v.records[k]; r.items = r.items || []; r.payments = r.payments || []; r.discounts = r.discounts || []; r.branch = key; out.push(r);
+    });
+  }
+  function startApp() {
+    if (started) return; started = true;
+    const first = isAdmin() ? db.ref('credit').once('value').then(snap => {
+      if (snap.exists()) return;
+      try {
+        const old = JSON.parse(localStorage.getItem(K_OLD));
+        if (!(old && Array.isArray(old.records) && old.records.length)) return;
+        const n = parseInt(prompt('Old records were found in this browser. Which branch do they belong to?\n' +
+          BRANCHES.map((x, i) => (i + 1) + ' = ' + x.name).join('\n')), 10);
+        const br = BRANCHES[n - 1]; if (!br) return;
+        const up = {}, nums = [0];
+        old.records.forEach(r => {
+          const num = String(r.id).replace(/^C-/, ''); nums.push(parseInt(num, 10) || 0);
+          r.id = br.code + '-' + num; r.branch = br.key; up['credit/' + br.key + '/records/' + r.id] = r;
+        });
+        up['credit/' + br.key + '/seq'] = Math.max.apply(null, nums);
+        return db.ref().update(up).then(() => toast('Your old records were uploaded online.'));
+      } catch (e) {}
+    }).catch(dbErr) : Promise.resolve();
+    first.then(() => {
+      dataRef = db.ref(isAdmin() ? 'credit' : 'credit/' + profile.branch);
+      dataRef.on('value', snap => {
+        const v = snap.val() || {}, out = [];
+        if (isAdmin()) Object.keys(v).forEach(k => ingest(k, v[k], out)); else ingest(profile.branch, v, out);
+        out.sort((x, y) => ((x.createdAt || 0) - (y.createdAt || 0)) || (x.id < y.id ? -1 : 1));
+        data = { records: out };
+        render();
+      }, dbErr);
+    });
+  }
+
+  /* ======== staff (admin) ======== */
+  function loadStaff() {
+    if (!db || !isAdmin()) return;
+    db.ref('users').once('value').then(snap => {
+      const u = snap.val() || {}, keys = Object.keys(u);
+      $('staffRows').innerHTML = keys.length ? keys.map(k => {
+        const p = u[k];
+        return '<div class="sendrow"><div><b>' + esc(p.name) + '</b><small class="hint" style="display:block">' +
+          (p.role === 'admin' ? 'Admin (all branches)' : 'Attendant - ' + esc(branchName(p.branch))) + (p.email ? ' - ' + esc(String(p.email).replace('@abmedia.local', '')) : '') + '</small></div>' +
+          (p.role === 'admin' ? '<span class="muted">Protected admin</span>' : '<button class="btn red sm" data-rm="' + esc(k) + '">Remove access</button>') + '</div>';
+      }).join('') : '<p class="muted">No staff yet.</p>';
+    }).catch(dbErr);
+  }
+  $('staffRows').addEventListener('click', e => {
+    const k = e.target.dataset.rm; if (!k) return;
+    if (confirm('Remove this person\'s access? They will no longer be able to open the system.')) {
+      db.ref('users/' + k).remove().then(loadStaff).catch(dbErr);
+    }
+  });
+  $('staffForm').addEventListener('submit', e => {
+    e.preventDefault();
+    if (!db || !isAdmin()) return;
+    const name = $('st-name').value.trim(), email = toEmail($('st-email').value), pass = $('st-pass').value;
+    const role = $('st-role').value, br = $('st-branch').value;
+    const second = firebase.apps.filter(x => x.name === 'second')[0] || firebase.initializeApp(FIREBASE_CONFIG, 'second');
+    const a2 = second.auth();
+    a2.createUserWithEmailAndPassword(email, pass).then(cred => {
+      const prof = { name: name, email: email, role: role };
+      if (role !== 'admin') prof.branch = br;
+      return db.ref('users/' + cred.user.uid).set(prof);
+    }).then(() => {
+      a2.signOut(); $('staffForm').reset(); loadStaff();
+      toast('Login created. Give them the username and PIN.');
+    }).catch(err => {
+      toast(err && err.code === 'auth/email-already-in-use' ? 'That username already has a login.' : 'Could not create login: ' + ((err && err.message) || ''));
+    });
+  });
+
+  /* ======== sign in ======== */
+  function lock(on) { document.body.classList.toggle('locked', on); $('loginPage').classList.toggle('hide', !on); if (on) window.scrollTo(0, 0); }
+  if (typeof firebase === 'undefined' || String(FIREBASE_CONFIG.apiKey).indexOf('PASTE') === 0) {
+    lock(true);
+    $('loginErr').textContent = 'The system is not connected to the online database yet. The Firebase details are missing in index.html, so nobody can sign in.';
+    $('loginForm').addEventListener('submit', e => e.preventDefault());
+  } else {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.database();
+    const auth = firebase.auth();
+    function watchAuth() { auth.onAuthStateChanged(u => {
+      if (!u) {
+        if (dataRef) { dataRef.off(); dataRef = null; }
+        profile = null; started = false; data = { records: [] }; render();
+        $('logoutBtn').classList.add('hide'); $('staffBtn').classList.add('hide');
+        switchTab('records');
+        lock(true);
+        return;
+      }
+      db.ref('users/' + u.uid).once('value').then(s => {
+        const p = s.val();
+        if (!p || (p.role !== 'admin' && !BRANCHES.some(x => x.key === p.branch))) {
+          $('loginErr').textContent = 'This login has no branch assigned. Ask the admin.';
+          auth.signOut(); return;
+        }
+        profile = Object.assign({ uid: u.uid }, p);
+        $('loginErr').textContent = '';
+        lock(false);
+        applyProfile(); startApp();
+      }).catch(err => {
+        $('loginErr').textContent = 'Signed in, but your profile could not be read. Error: ' + ((err && (err.code || err.message)) || err) + '. Check the database rules and the users entry in Realtime Database.';
+        console.error(err); auth.signOut();
+      });
+    }); }
+    /* Sign-in lasts only while the browser is open. A new browser session always shows the login page. */
+    let first = true; try { first = localStorage.getItem('creditTracker.auth') !== 'session'; } catch (e) {}
+    Promise.resolve()
+      .then(() => auth.setPersistence(firebase.auth.Auth.Persistence.SESSION))
+      .then(() => first ? auth.signOut() : null)
+      .catch(e => console.error(e))
+      .then(() => { try { localStorage.setItem('creditTracker.auth', 'session'); } catch (e) {} watchAuth(); });
+    $('loginForm').addEventListener('submit', e => {
+      e.preventDefault(); $('loginErr').textContent = '';
+      auth.signInWithEmailAndPassword(toEmail($('l-email').value), $('l-pass').value)
+        .catch(err => {
+          const c = (err && err.code) || String(err);
+          let m;
+          if (/invalid-credential|wrong-password|user-not-found|invalid-login/.test(c)) m = 'Wrong username or PIN. (If you are sure it is right, the username must be the full email you created in Firebase.)';
+          else if (/invalid-email/.test(c)) m = 'The username is not valid. Use the full email, for example name@gmail.com.';
+          else if (/unauthorized-domain|operation-not-supported|web-storage-unsupported/.test(c)) m = 'This website address is not allowed yet. In Firebase go to Authentication > Settings > Authorized domains and add this address. Open the system from your github.io link, not from a file on your computer.';
+          else if (/api-key|invalid-api/.test(c)) m = 'The apiKey inside index.html is wrong. Copy it again from Firebase Project settings.';
+          else if (/operation-not-allowed|configuration-not-found/.test(c)) m = 'Email/Password sign-in is not switched on in Firebase (Authentication > Sign-in method).';
+          else if (/network/.test(c)) m = 'No internet connection. Try again.';
+          else if (/too-many-requests/.test(c)) m = 'Too many tries. Wait a few minutes, then try again.';
+          else if (/user-disabled/.test(c)) m = 'This login has been disabled in Firebase.';
+          else m = 'Sign-in problem. Error code: ' + c;
+          $('loginErr').textContent = m;
+          console.error(err);
+        });
+    });
+    $('logoutBtn').onclick = () => auth.signOut();
+  }
+})();
+</script>
+</body>
+</html>
